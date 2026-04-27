@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Dodgers Stats" />
+<title>Dodgers Stats</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f2f2f7; color: #1c1c1e; min-height: 100vh; }
+  .header { background: #1a3a6b; color: #fff; padding: 52px 16px 16px; }
+  .header h1 { font-size: 20px; font-weight: 600; }
+  .header p { font-size: 13px; opacity: 0.7; margin-top: 2px; }
+  .tabs { display: flex; background: #1a3a6b; padding: 0 12px 12px; gap: 6px; }
+  .tab { flex: 1; padding: 8px 4px; text-align: center; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6); border-radius: 8px; cursor: pointer; border: none; background: transparent; }
+  .tab.active { background: rgba(255,255,255,0.2); color: #fff; }
+  .content { padding: 16px; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .card { background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .field-group { margin-bottom: 10px; }
+  .field-group label { display: block; font-size: 11px; font-weight: 600; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  input[type=text], input[type=date], input[type=number], select, textarea {
+    width: 100%; padding: 10px 12px; font-size: 15px; border: 1px solid #e5e5ea; border-radius: 8px;
+    background: #fff; color: #1c1c1e; font-family: inherit; appearance: none; -webkit-appearance: none;
+  }
+  textarea { resize: vertical; min-height: 70px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px; }
+  .stat-grid.three { grid-template-columns: repeat(3, 1fr); }
+  .stat-field label { font-size: 10px; font-weight: 600; color: #8e8e93; text-transform: uppercase; display: block; margin-bottom: 3px; }
+  .stat-field input { padding: 8px 6px; font-size: 14px; text-align: center; }
+  .player-name { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: #1c1c1e; }
+  .submit-btn { width: 100%; padding: 14px; background: #1a3a6b; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 6px; font-family: inherit; }
+  .submit-btn:active { opacity: 0.8; }
+  .submit-btn:disabled { opacity: 0.5; }
+  .toast { display: none; padding: 12px 16px; border-radius: 10px; font-size: 14px; text-align: center; margin-top: 10px; font-weight: 500; }
+  .toast.success { background: #d1fae5; color: #065f46; }
+  .toast.error { background: #fee2e2; color: #991b1b; }
+  .section-note { font-size: 12px; color: #8e8e93; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Colt Dodgers 2026</h1>
+  <p>Game stat entry</p>
+</div>
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('game',this)">Game</button>
+  <button class="tab" onclick="switchTab('hitting',this)">Hitting</button>
+  <button class="tab" onclick="switchTab('pitching',this)">Pitching</button>
+</div>
+<div class="content">
+  <div id="tab-game" class="section active">
+    <div class="card">
+      <div class="two-col">
+        <div class="field-group"><label>Date</label><input type="date" id="g-date" /></div>
+        <div class="field-group"><label>Home / Away</label><select id="g-ha"><option value="Home">Home</option><option value="Away">Away</option></select></div>
+      </div>
+      <div class="field-group"><label>Opponent</label><input type="text" id="g-opp" placeholder="e.g. Padres" /></div>
+      <div class="two-col">
+        <div class="field-group"><label>Our score</label><input type="number" id="g-us" min="0" placeholder="0" inputmode="numeric" /></div>
+        <div class="field-group"><label>Opp score</label><input type="number" id="g-them" min="0" placeholder="0" inputmode="numeric" /></div>
+      </div>
+      <div class="two-col">
+        <div class="field-group"><label>Result</label><select id="g-result"><option value="W">W</option><option value="L">L</option><option value="T">T</option></select></div>
+        <div class="field-group"><label>Starting pitcher</label><select id="g-sp"><option value="Drew Swiderski">Drew S.</option><option value="Christian Hooley">Christian H.</option><option value="Carter Fralick">Carter F.</option><option value="Liam Cloward">Liam C.</option><option value="Andre Seamons">Andre S.</option><option value="Ridge Smith">Ridge S.</option><option value="Hudson Baima">Hudson B.</option></select></div>
+      </div>
+      <div class="field-group"><label>Key positives</label><textarea id="g-pos" placeholder="What went well..."></textarea></div>
+      <div class="field-group"><label>Adjustments needed</label><textarea id="g-adj" placeholder="Areas to improve..."></textarea></div>
+    </div>
+    <button class="submit-btn" onclick="submitGame(this)">Save game log</button>
+    <div class="toast" id="toast-game"></div>
+  </div>
+  <div id="tab-hitting" class="section">
+    <p class="section-note">Enter stats for each player this game</p>
+    <div id="hitting-cards"></div>
+    <button class="submit-btn" onclick="submitHitting(this)">Save hitting stats</button>
+    <div class="toast" id="toast-hitting"></div>
+  </div>
+  <div id="tab-pitching" class="section">
+    <p class="section-note">Enter stats for pitchers who appeared</p>
+    <div id="pitching-cards"></div>
+    <button class="submit-btn" onclick="submitPitching(this)">Save pitching stats</button>
+    <div class="toast" id="toast-pitching"></div>
+  </div>
+</div>
+<script>
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbwvis2mpUurSYtEKYT0Hhy4BygGNPM2bhC_DhwrRFXQp7wGTgqUIqoUa0bPsU9OhzHFog/exec';
+const ROSTER=['Carter Fralick','Drew Swiderski','Jhett James','Christian Hooley','Andre Seamons','Liam Cloward','Karson Putman','Parley Alvernaz','Ridge Smith','Aaron Goodey','Hudson Baima','Logan Corrigan','Taylor Armstrong'];
+const PITCHERS=['Drew Swiderski','Christian Hooley','Carter Fralick','Liam Cloward','Andre Seamons','Ridge Smith','Hudson Baima'];
+function switchTab(name,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));el.classList.add('active');document.getElementById('tab-'+name).classList.add('active');}
+function sf(id){return document.getElementById(id);}
+function val(id){return sf(id)?sf(id).value:'';}
+function num(id){return parseInt(sf(id)?sf(id).value||'0':'0')||0;}
+function buildHitting(){sf('hitting-cards').innerHTML=ROSTER.map((name,i)=>`<div class="card"><div class="player-name">${name}</div><div class="stat-grid"><div class="stat-field"><label>AB</label><input type="number" id="h${i}_ab" min="0" value="0" inputmode="numeric"/></div><div class="stat-field"><label>H</label><input type="number" id="h${i}_h" min="0" value="0" inputmode="numeric"/></div><div class="stat-field"><label>2B</label><input type="number" id="h${i}_2b" min="0" value="0" inputmode="numeric"/></div><div class="stat-field"><label>3B</label><input type="number" id="h${i}_3b" min="0" value="0" inputmode="numeric"/></div></div><div class="stat-grid"><div class="stat-field"><label>HR</label><input type="number" id="h${i}_hr" min="0" value="0" inputmode="numeric"/></div><div class="stat-field"><label>BB</label><input type="number" id="h${i}_bb" min="0" value="0" inputmode="numeric"/></div><div class="stat-field"><label>HBP</label><input type="number" id="h${i}_hbp" min="0" value="0" inputmode="numeric"/></div><div class="stat-field"><label>K</label><input type="number" id="h${i}_k" min="0" value="0" inputmode="numeric"/></div></div><div class="stat-grid three"><div class="stat-field"><label>RBI</label><input type="number" id="h${i}_rbi" min="0" value="0" inputmode="numeric"/></div><div class="stat-field"><label>R</label><input type="number" id="h${i}_r" min="0" value="0" inputmode="numeric"/></div><div class="stat-field"><label>SB</label><input type="number" id="h${i}_sb" min="0" value="0" inputmode="numeric"/></div></div></div>`).join('');}
+function buildPitching(){sf('pitching-cards').innerHTML=PITCHERS.map((name,i)=>`<div class="card"><div class="player-name">${name}</div><div class="stat-grid"><div class="stat-field"><label>IP</label><input type="number" id="p${i}_ip" min="0" step="0.1" value="0" inputmode="decimal"/></div><div class="stat-field"><label>BF</label><input type="number" id="p${i}_bf" min="0" value="0" inputmode="numeric"/></div><div class="stat-field"><label>K</label><input type="number" id="p${i}_k" min="0" value="0" inputmode="numeric"/></div><div class="stat-field"><label>BB</label><input type="number" id="p${i}_bb" min="0" value="0" inputmode="numeric"/></div></div><div class="two-col"><div class="stat-field"><label>H</label><input type="number" id="p${i}_h" min="0" value="0" inputmode="numeric"/></div><div class="stat-field"><label>ER</label><input type="number" id="p${i}_er" min="0" value="0" inputmode="numeric"/></div></div></div>`).join('');}
+function showToast(id,msg,isError){const el=sf(id);el.textContent=msg;el.className='toast '+(isError?'error':'success');el.style.display='block';setTimeout(()=>{el.style.display='none';},4000);}
+async function post(payload,toastId,btn,label){btn.disabled=true;btn.textContent='Saving...';try{const res=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(payload)});const r=await res.json();showToast(toastId,r.success?'Saved to sheet!':'Error: '+r.error,!r.success);}catch(e){showToast(toastId,'Connection error — try again.',true);}btn.disabled=false;btn.textContent=label;}
+function submitGame(btn){post({type:'gamelog',date:val('g-date'),opponent:val('g-opp'),homeaway:val('g-ha'),ourscore:val('g-us'),oppscore:val('g-them'),result:val('g-result'),startingpitcher:val('g-sp'),keypositives:val('g-pos'),adjustments:val('g-adj')},'toast-game',btn,'Save game log');}
+function submitHitting(btn){const players=ROSTER.map((name,i)=>({name,ab:num('h'+i+'_ab'),h:num('h'+i+'_h'),singles:Math.max(0,num('h'+i+'_h')-num('h'+i+'_2b')-num('h'+i+'_3b')-num('h'+i+'_hr')),doubles:num('h'+i+'_2b'),triples:num('h'+i+'_3b'),hr:num('h'+i+'_hr'),bb:num('h'+i+'_bb'),hbp:num('h'+i+'_hbp'),k:num('h'+i+'_k'),rbi:num('h'+i+'_rbi'),r:num('h'+i+'_r'),sb:num('h'+i+'_sb')}));post({type:'hitting',players},'toast-hitting',btn,'Save hitting stats');}
+function submitPitching(btn){const pitchers=PITCHERS.map((name,i)=>({name,ip:val('p'+i+'_ip'),bf:num('p'+i+'_bf'),k:num('p'+i+'_k'),bb:num('p'+i+'_bb'),h:num('p'+i+'_h'),er:num('p'+i+'_er')}));post({type:'pitching',pitchers},'toast-pitching',btn,'Save pitching stats');}
+sf('g-date').value=new Date().toISOString().split('T')[0];
+buildHitting();
+buildPitching();
+</script>
+</body>
+</html>
